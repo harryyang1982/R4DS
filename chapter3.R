@@ -280,3 +280,276 @@ not_cancelled %>%
 
 ## Counts
 
+delays <- not_cancelled %>% 
+  group_by(tailnum) %>% 
+  summarise(
+    delay = mean(arr_delay)
+  )
+
+ggplot(delays, aes(x = delay)) +
+  geom_freqpoly(binwidth = 10)
+
+delays <- not_cancelled %>% 
+  group_by(tailnum) %>% 
+  summarise(
+    delay = mean(arr_delay, na.rm = T),
+    n = n()
+  )
+
+ggplot(delays, mapping = aes(x = n, y = delay)) +
+  geom_point(alpha = 1/10)
+
+delays %>% 
+  filter(n > 25) %>% 
+  ggplot(aes(x = n, y = delay)) +
+  geom_point(alpha = 1/10)
+
+batting <- as_tibble(Lahman::Batting)
+
+batters <- batting %>% 
+  group_by(playerID) %>% 
+  summarise(
+    ba = sum(H, na.rm = T) / sum(AB, na.rm = T),
+    ab = sum(AB, na.rm = T)
+  )
+
+batters %>% 
+  filter(ab > 100) %>% 
+  ggplot(aes(x = ab, y = ba)) +
+  geom_point() +
+  geom_smooth(se = F)
+
+batters %>% 
+  arrange(desc(ba))
+
+## Useful Summary Functions
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    # average delay:
+    avg_delay1 = mean(arr_delay),
+    # average positive delay:
+    avg_delay2 = mean(arr_delay[arr_delay > 0])
+  )
+
+not_cancelled %>% 
+  group_by(dest) %>% 
+  summarise(distance_sd = sd(distance)) %>% 
+  arrange(desc(distance_sd))
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    first = min(dep_time),
+    last = max(dep_time)
+  )
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    first_dep = first(dep_time),
+    last_dep = last(dep_time)
+  )
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  mutate(r = min_rank(desc(dep_time))) %>% 
+  filter(r %in% range(r))
+
+not_cancelled %>% 
+  group_by(dest) %>% 
+  summarise(carriers = n_distinct(carrier)) %>% 
+  arrange(desc(carriers))
+
+not_cancelled %>% 
+  count(dest)
+
+not_cancelled %>% 
+  count(tailnum, wt = distance)
+
+not_cancelled %>% 
+  count(tailnum, wt = air_time)
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(n_early = sum(dep_time < 500))
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(hour_perc = mean(arr_delay > 60))
+
+mean(not_cancelled$arr_delay > 60)
+
+## Grouping by Multiple Variables
+
+daily <- group_by(flights, year, month, day)
+(per_day <- summarise(daily, flights = n()))
+(per_month <- summarise(per_day, flights = sum(flights)))
+(per_year <- summarise(per_month, flights = sum(flights)))
+
+## Ungrouping
+
+daily %>% 
+  ungroup() %>% 
+  summarise(flights = n())
+
+# Exercises
+
+#1
+flights %>% 
+  mutate(early_late = ifelse(arr_delay == 15, "late",
+                             ifelse(arr_delay == -15, "early", "soso"))) %>% 
+  group_by(tailnum) %>% 
+  summarise(late_sum = mean(early_late =="late", na.rm=T), early_sum = mean(early_late=="early", na.rm=T))
+  
+flights %>% 
+  group_by(tailnum) %>% 
+  summarise(late_sum = mean(arr_delay == 15, na.rm=T), early_sum = mean(arr_delay == -15, na.rm=T)) %>% 
+  filter(late_sum == 0.5, early_sum == 0.5)
+
+flights %>% 
+  group_by(tailnum) %>% 
+  summarise(ten_late = mean(arr_delay == 10, na.rm=T))
+
+flights %>% 
+  summarise(ten_late = mean(arr_delay == 10, na.rm=T))
+
+flights %>% 
+  group_by(tailnum) %>% 
+  summarise(late_sum = mean(arr_delay == 30, na.rm=T), early_sum = mean(arr_delay == -30, na.rm=T)) %>% 
+  filter(late_sum >= 0.5, early_sum <= 0.5)
+
+flights %>% 
+  group_by(tailnum) %>% 
+  summarise(late_sum = mean(arr_delay == 200, na.rm=T), on_time = mean(arr_delay == 0, na.rm=T)) %>% 
+  filter(late_sum <= 0.01, on_time >= 0.99)
+
+#2
+not_cancelled %>% 
+  count(dest)
+
+not_cancelled %>% 
+  group_by(dest) %>% 
+  summarise(n())
+
+not_cancelled %>% 
+  count(tailnum, wt = distance)
+
+not_cancelled %>% 
+  group_by(tailnum) %>% 
+  summarise(n = sum(distance))
+
+#3
+flights %>% 
+  filter((is.na(arr_delay)))
+
+#4
+cancelled <- flights %>% 
+  filter((is.na(arr_delay)))
+
+cancelled_day <- cancelled %>% 
+  group_by(year, month, day) %>% 
+  count() %>% 
+  arrange(desc(n))
+
+cancelled_month <- cancelled_day %>% 
+  group_by(year, month) %>% 
+  summarise(n=sum(n))
+
+#5
+flights %>% 
+  group_by(carrier, dest) %>% 
+  summarise(n())
+
+flights %>% 
+  group_by(dest) %>% 
+  summarise(delay_mean = mean(arr_delay, na.rm=T)) %>% 
+  arrange(desc(delay_mean)) %>% 
+  head(10)
+
+flights %>% 
+  group_by(carrier) %>% 
+  summarise(delay_mean = mean(arr_delay, na.rm=T)) %>% 
+  arrange(desc(delay_mean)) %>% 
+  head(10)
+
+flights %>% 
+  group_by(carrier, dest) %>% 
+  summarise(delay_mean = mean(arr_delay, na.rm=T)) %>% 
+  arrange(desc(delay_mean)) %>% 
+  head(20) %>% 
+  ggplot(aes(x=dest, y=delay_mean)) +
+  geom_col(aes(fill=carrier))
+
+#6
+flights %>% 
+  group_by(carrier) %>% 
+  summarise(n=n_distinct(dep_delay > 100))
+
+#7
+flights %>% 
+  count(dest, sort = T)
+
+# Grouped Mutates (and Filters)
+
+flights_sml %>% 
+  group_by(year, month, day) %>% 
+  filter(rank(desc(arr_delay)) < 10)
+
+popular_dests <- flights %>% 
+  group_by(dest) %>% 
+  filter(n() > 365)
+
+popular_dests
+
+popular_dests %>% 
+  filter(arr_delay > 0) %>% 
+  mutate(prop_delay = arr_delay / sum(arr_delay)) %>% 
+  select(year:day, dest, arr_delay, prop_delay)
+
+# Exercises
+
+#2
+worst_tail <- flights %>% 
+  filter(arr_delay > 0, dep_delay > 0) %>% 
+  group_by(tailnum) %>% 
+  summarise(delay_mean = mean(arr_delay+dep_delay)) %>% 
+  arrange(desc(delay_mean)) %>% 
+  head(10)
+
+#3
+flights %>% 
+  filter(dep_delay > 0) %>% 
+  group_by(hour) %>% 
+  summarise(delay = sum(dep_delay>0, na.rm=T) / sum(dep_delay, na.rm=T)) %>% 
+  arrange(delay)
+
+#4
+flights %>% 
+  group_by(dest) %>% 
+  filter(arr_delay <0) %>% 
+  summarise(minus_delay = mean(arr_delay, na.rm=T))
+
+flights %>% 
+  filter(arr_delay >0) %>% 
+  mutate(delay_prop = arr_delay / sum(arr_delay, na.rm=T)) %>% 
+  group_by(tailnum) %>% 
+  summarise(delay_p = mean(delay_prop))
+  
+#5
+not_cancelled %>% 
+  filter(arr_delay > 10) %>% 
+  mutate(lag_delay = lag(arr_delay)) %>% 
+  ggplot(aes(arr_delay, lag_delay)) +
+  geom_point() +
+  geom_smooth()
+
+#6
+not_cancelled %>% 
+  group_by(tailnum) %>% 
+  mutate(speed = distance / air_time) %>% 
+  summarise(mean_speed = mean(speed)) %>% 
+  arrange(mean_speed) %>% 
+  head(10)
+  
