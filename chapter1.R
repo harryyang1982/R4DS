@@ -163,7 +163,7 @@ ggplot(mpg) +
   geom_smooth(aes(displ, hwy))
 
 ggplot(mpg, aes(displ, hwy)) +
-  geom_point() + geom_smooth()
+  geom_point() + geom_smooth(method="lm")
 
 ggplot(mpg, aes(displ, hwy)) +
   geom_point(aes(color=class)) +
@@ -217,7 +217,7 @@ demo <- tribble(
 demo
 
 ggplot(data=demo) +
-  geom_bar(aes(x=a, y=b), stat="identity"  )
+  geom_bar(aes(x=a, y=b), stat="identity")
 ggplot(data=demo) +
   geom_col(aes(x=a, y=b))
 
@@ -251,3 +251,109 @@ ggplot(data = diamonds) +
 
 ?geom_bar
 ??geom_bar
+
+# Position Adjustments
+ggplot(diamonds) +
+  geom_bar(aes(cut, color=cut))
+
+ggplot(diamonds) +
+  geom_bar(aes(x=cut, fill=cut))
+
+ggplot(diamonds) +
+  geom_bar(aes(cut, fill=clarity))
+
+ggplot(data=diamonds, aes(x=cut, fill=clarity)) +
+  geom_bar(alpha=1/5, position="identity")
+ggplot(data=diamonds, mapping=aes(x=cut, color=clarity) +
+         geom_bar(fill=NA, position="identity"))
+
+ggplot(diamonds) +
+  geom_bar(aes(x=cut, fill=clarity),
+           position="fill")
+
+ggplot(diamonds) +
+  geom_bar(
+    mapping = aes(x = cut, fill = clarity),
+    position = "dodge"
+  )
+
+ggplot(mpg) +
+  geom_point(
+    aes(x=displ, y=hwy)
+  )
+
+ggplot(mpg) +
+  geom_point(aes(x=displ, y=hwy),
+             position="jitter")
+
+# 1-5 Exercises
+
+ggplot(mpg, aes(x=cty, y=hwy)) +
+  geom_point()
+
+ggplot(mpg, aes(x=cty, y=hwy)) +
+  geom_point(position = "jitter")
+
+?geom_jitter
+
+ggplot(mpg, aes(x=cty, y=hwy)) +
+  geom_jitter()
+
+ggplot(mpg, aes(x=cty, y=hwy)) +
+  geom_count()
+
+ggplot(mpg, aes(displ, hwy, group=displ)) +
+  geom_boxplot()
+
+data(mpg)
+head(mpg)
+
+ggplot(mpg, aes(manufacturer, hwy)) +
+  geom_boxplot()
+
+# Coordinate Systems
+
+ggplot(mpg, aes(x=class, y=hwy)) +
+  geom_boxplot()
+
+ggplot(mpg, aes(x=class, y=hwy)) +
+  geom_boxplot() +
+  coord_flip()
+
+nz <- map_data("nz")
+ggplot(nz, aes(long, lat, group=group)) +
+  geom_polygon(fill = "white", color="black")
+
+ggplot(nz, aes(long, lat, group=group)) +
+  geom_polygon(fill = "white", color="black") +
+  coord_quickmap()
+
+bar <- ggplot(data = diamonds) +
+  geom_bar(
+    mapping = aes(x=cut, fill=cut),
+    show.legend = F,
+    width=1
+  ) +
+  theme(aspect.ratio = 1) +
+  labs(x = NULL, y = NULL)
+
+bar + coord_flip()
+bar + coord_polar()
+
+# 1.6 Exercises
+
+#1
+ggplot(diamonds) +
+  geom_bar(aes(x=cut, fill=cut)) + coord_polar()
+
+#3
+?coord_map
+
+#4
+
+ggplot(data=mpg, mapping = aes(x = cty, y= hwy)) +
+  geom_point() +
+  geom_abline() +
+  coord_fixed()
+
+?geom_abline
