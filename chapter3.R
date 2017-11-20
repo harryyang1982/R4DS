@@ -552,4 +552,11 @@ not_cancelled %>%
   summarise(mean_speed = mean(speed)) %>% 
   arrange(mean_speed) %>% 
   head(10)
-  
+
+k <- not_cancelled %>% 
+  group_by(dest, carrier) %>% 
+  count() %>% 
+  filter(n >= 2) %>% 
+  group_by(carrier) %>% 
+  count()
+
