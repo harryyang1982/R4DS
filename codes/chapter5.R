@@ -124,3 +124,92 @@ ggplot(diamonds2, aes(x=y)) +
 ggplot(diamonds2, aes(x=y)) +
   geom_histogram()
 
+## Covariation
+
+ggplot(diamonds, aes(x = price)) +
+  geom_freqpoly(aes(color = cut), binwidth = 500)
+ggplot(diamonds) +
+  geom_bar(aes(x = cut))
+
+diamonds %>% 
+  ggplot(aes(x = price, y = ..density..)) +
+  geom_freqpoly(aes(color = cut), binwidth = 500)
+
+diamonds %>%
+  ggplot(aes(x = cut, y = price)) +
+  geom_boxplot()
+
+mpg %>% 
+  ggplot(aes(x = class, y = hwy)) +
+  geom_boxplot()
+
+mpg %>% 
+  ggplot() +
+  geom_boxplot(aes(x = reorder(class, hwy, FUN = median),
+                   y = hwy))
+
+mpg %>% 
+  ggplot() +
+  geom_boxplot(aes(x = reorder(class, hwy, FUN = median),
+                   y = hwy)) +
+  coord_flip()
+
+# Exercises
+
+##1.
+
+flights %>% 
+  filter(is.na(arr_time)) %>% 
+  ggplot(aes(x = reorder(carrier, dep_time, FUN = median), y = dep_time)) +
+  geom_boxplot()
+
+not_cancelled %>% 
+  ggplot(aes(x = reorder(carrier, dep_time, FUN = median), y = dep_time)) +
+  geom_boxplot()
+
+##2.
+
+glimpse(diamonds)
+
+predict_price <- glm(price ~ ., data = diamonds)
+summary(predict_price)
+
+diamonds %>% 
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(aes(color = clarity))
+
+diamonds %>% 
+  ggplot(aes(x = cut, y = carat)) +
+  geom_col(aes(fill = clarity), position = "dodge")
+
+##3.
+
+library(ggstance)
+
+mpg %>% 
+  ggplot() +
+  geom_boxploth(aes(hwy, reorder(class, hwy, FUN = median)))
+
+##4.
+
+library(lvplot)
+??lvplot
+
+diamonds %>% 
+  ggplot(aes(x = cut, y = price)) +
+  geom_lv()
+
+mpg %>% 
+  ggplot() +
+  geom_lv(aes(x = class, y = hwy))
+
+##5.
+ggplot(diamonds) +
+  geom_histogram(aes(x = y), binwidth = 0.5)
+
+ggplot(diamonds) +
+  geom_violin(aes(x = cut, y = price))
+
+##6.
+library(ggbeeswarm)
+ggplot(ggplot2::mpg,aes(class, hwy)) + geom_beeswarm()
