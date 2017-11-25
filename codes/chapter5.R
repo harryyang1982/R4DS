@@ -213,3 +213,132 @@ ggplot(diamonds) +
 ##6.
 library(ggbeeswarm)
 ggplot(ggplot2::mpg,aes(class, hwy)) + geom_beeswarm()
+
+## Two Categorical Variables
+
+diamonds %>% 
+  ggplot() +
+  geom_count(aes(x = cut, y = color))
+
+diamonds %>% 
+  count(color, cut)
+
+diamonds %>% 
+  count(color, cut) %>% 
+  ggplot(mapping = aes(x = color, y = cut)) +
+  geom_tile(mapping = aes(fill = n))
+
+## Exercises
+
+##1
+
+diamonds %>% 
+  count(cut, color) %>% 
+  ggplot(mapping = aes(x = cut, y = color)) +
+  geom_tile(aes(fill = n))
+
+##2
+
+library(nycflights13)
+flights %>% 
+  count(month, dest) %>% 
+  ggplot(aes(month, dest)) +
+  geom_tile(aes(fill = n))
+
+flights %>% 
+  count(dest, month) %>% 
+  ggplot(aes(dest, month)) +
+  geom_tile(aes(fill = n))
+
+flights %>% 
+  filter(!is.na(dep_delay)) %>% 
+  count(dest, month) %>% 
+  ggplot(aes(dest, month)) +
+  geom_tile(aes(fill = n))
+
+flights %>% 
+  filter(!is.na(dep_delay)) %>% 
+  group_by(dest, month) %>% 
+  summarise(arr_delay = mean(arr_delay, na.rm=T)) %>% 
+  ggplot(aes(month, reorder(dest, arr_delay))) +
+  geom_tile(aes(fill = arr_delay))
+
+##3
+diamonds %>% 
+  ggplot() +
+  geom_count(aes(color, cut))
+
+diamonds %>% 
+  ggplot() +
+  geom_count(aes(cut, color))
+
+## Two Continuous Variables
+
+diamonds %>% 
+  ggplot() +
+  geom_point(aes(x = carat, y = price))
+
+ggplot(diamonds) +
+  geom_point(
+    aes(x = carat, y = price), 
+    alpha = 1 / 100
+  )
+
+ggplot(smaller) +
+  geom_bin2d(aes(x = carat, y = price))
+
+library(hexbin)
+ggplot(smaller) +
+  geom_hex(aes(x = carat, y = price))
+
+ggplot(smaller, aes(x = carat, y = price)) +
+  geom_boxplot(aes(group = cut_width(carat, 0.1)))
+
+ggplot(smaller, aes(x = carat, y = price)) +
+  geom_boxplot(aes(group = cut_width(carat, 0.1)), varwidth = T)
+
+ggplot(smaller, aes(x = carat, y = price)) +
+  geom_boxplot(aes(group = cut_number(carat, 20)))
+
+## Exercises
+
+#1
+ggplot(smaller) +
+  geom_freqpoly(aes(carat, color=cut_number(price, 20)))
+
+#2
+smaller %>% 
+  ggplot(aes(x = cut_number(price, 20), y = carat)) +
+  geom_boxplot()
+
+#3
+
+diamonds %>% 
+  ggplot(aes(x = carat, y = price)) +
+  geom_boxplot(aes(group = cut_width(carat, 0.1)))
+
+#4
+#5
+
+ggplot(diamonds) +
+  geom_point(aes(x = x, y = y)) +
+  coord_cartesian(xlim = c(4, 11), ylim = c(4, 11))
+
+# Patterns and Models
+
+ggplot(faithful) +
+  geom_point(aes(x = eruptions, y = waiting))
+
+library(modelr)
+
+mod <- lm(log(price) ~ log(carat), data = diamonds)
+
+diamonds2 <- diamonds %>% 
+  add_residuals(mod) %>% 
+  mutate(resid = exp(resid))
+
+ggplot(diamonds2) +
+  geom_point(aes(x = carat, y = resid))
+
+ggplot(diamonds2) +
+  geom_boxplot(aes(x = cut, y = resid))
