@@ -175,3 +175,94 @@ str_view(words, "^y", match = T)
 str_view(words, "$x", match = T)
 str_view(words, "^...$", match = T)
 str_view(words, "^.......", match = T)
+
+## Character Classes and Alternatives
+
+str_view(c("grey", "gray"), "gr(e|a)y")
+
+## Exercises
+
+#1.
+#a. 
+str_view(words, "^[aeiou]", match = T)
+#b.
+str_view(words, "^[^aeiou]*$", match = T)
+#c.
+str_view(words, "[^e]ed$", match =T)
+#d.
+str_view(words, "i(ng|ze)", match = T)
+#2.
+str_view(words, "([^c]|)ei", match = T)
+#3.
+str_view(words, "q[^u]", match = T)
+#4
+str_view(words, "ize", match = T)
+str_view(words, "ise", match = T)
+#5
+phone_numbers = c("02-491-7454","010-3298-7454","01032987454")
+str_view(phone_numbers, "010(-|)\\d(\\d|)(-|)\\d\\d\\d(-|)\\d\\d(-|)\\d\\d", match = T)
+
+## Repetition
+
+x <- "1888 is the longest year in Roman numerals: MDCCCLXXXVIII"
+str_view(x, "CC?")
+str_view(x, "CC+")
+str_view(x, 'C[LX]+')
+
+str_view(x, "C{2}")
+str_view(x, "C{2,}")
+str_view(x, "C{2,3}")
+
+str_view(x, 'C{2,3}?')
+str_view(x, 'C[LX]+?')
+
+## Exercises
+#1
+#{1}, {1,}, {0,}
+#2
+#a
+str_view(x, "^.*$")
+str_view(x, "\\{.+\\}", match = T)
+str_view(x, "\\d{4}-\\d{2}-\\d{2}", match = T)
+str_view(x, "\\\\{4}", match = T)
+
+#3
+str_view(words, "^[^aeiou]{3}", match = T)
+str_view(words, "[^aeiou]{3,}", match = T)
+str_view(words, "([aeiou][^aeiou]){2,}", match = T)
+
+#4.
+
+## Grouping and Backreferences
+
+str_view(fruit, "(..)\\1", match = T)
+
+## Exercises
+#1
+str_view(words, "(.)\\1\\1", match = T)
+str_view(words, "(.)(.)\\2\\1", match = T)
+str_view(words, "(..)\\1", match = T)
+str_view(words, "(.).\\1.\\1", match = T)
+str_view(words, "(.)(.)(.).*\\3\\2\\1", match = T)
+
+#2
+str_view(words, "^(.).*\\1$", match = T)
+str_view(words, "(..).*\\1", match = T)
+str_view(words, "(.).*\\1.*\\1", match = T)
+
+## Tools
+
+## Detect Matches
+
+x <- c("apple", "banana", "pear")
+str_detect(x, "e")
+sum(str_detect(words, "^t"))
+# what proportion of common words end with a vowel?
+mean(str_detect(words, "[aeiou]$"))
+
+no_vowels_1 <- !str_detect(words, "[aeiou]")
+no_vowels_2 <- str_detect(words, "^[^aeiou]+$")
+identical(no_vowels_1, no_vowels_2)
+
+words[str_detect(words, "x$")]
+str_subset(words, "x$")
