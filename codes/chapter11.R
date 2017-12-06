@@ -428,3 +428,130 @@ str_replace_all(sentences[1:10], c("A" = "a", "B" = "b", "C" = "c", "D" = "d", "
 words %>% 
   str_replace("^(.)(.*)(.)$", "\\3 \\2 \\1") %>% 
   head(5)
+
+## Splitting
+
+sentences %>% 
+  str_split(" ")
+
+"a|b|c|d" %>% 
+  str_split("\\|") %>% 
+.[[1]]
+
+sentences %>% 
+  head(5) %>% 
+  str_split(" ", simplify = T)
+
+fields <- c("Name: Hadley", "Country: NZ", "Age: 35")
+fields %>%
+  str_split(": ", n = 2, simplify = T)
+
+x <- "This is a sentence. This is another sentence."
+str_view_all(x, boundary("word"))
+
+str_split(x, " ")[[1]]
+str_split(x, boundary("word"))[[1]]
+
+## Exercises
+
+#1
+apple_split <- "apples, pears, and bananas" %>% 
+  str_split(", ") %>% 
+  .[[1]]
+apple_split %>% 
+  str_split(" ", simplify = T)
+
+"apples, pears, and bananas" %>% 
+  str_split(", +(and +)?") 
+
+#2
+str_split("apples, pears, and bananas", boundary("word"))
+
+#3
+str_split("ab. cd|agt", "")[[1]]
+
+# Other Types of Pattern
+
+str_view(fruit, "nana", match = T)
+str_view(fruit, regex("nana"), match = T)
+
+bananas <- c("banana", "Banana", "BANANA")
+str_view(bananas, "banana")
+str_view(bananas, regex("banana", ignore_case = T))
+
+x <- "Line 1\nLine 2\nLine 3"
+str_extract_all(x, "^Line")[[1]]
+str_extract_all(x, regex("^Line", multiline = T))[[1]]
+
+phone <- regex("
+  \\(?     # optional opening parens
+  (\\d{3}) # area code
+  [)- ]?   # optional closing parens, dash, or space
+  (\\d{3}) # another three numbers
+  [ -]?    # optional space or dash
+  (\\d{3}) # three more numbers
+  ", comments = T)
+
+str_match("514-791-8141", phone)
+
+microbenchmark::microbenchmark(
+  fixed = str_detect(sentences, fixed("the")),
+  regex = str_detect(sentences, "the"),
+  times = 20
+)
+
+a1 <- "\u00e1"
+a2 <- "a\u0301"
+c(a1, a2)
+
+a1 == a2
+
+str_detect(a1, fixed(a2))
+str_detect(a1, coll(a2))
+
+stringi::stri_locale_info()
+
+x <- "This is a sentence."
+str_view_all(x, boundary("word"))
+str_extract_all(x, boundary("word"))
+
+## Exercises
+
+#1
+str_subset(c("a\\b", "ab"), "\\\\")
+str_subset(c("a\\b", "ab"), fixed("\\"))
+
+#2
+str_extract_all(sentences, boundary("word")) %>% 
+  unlist() %>% 
+  str_to_lower() %>% 
+  as.tibble() %>% 
+  group_by(value) %>% 
+  summarise(count=n()) %>% 
+  arrange(desc(count)) %>% 
+  filter(count > 10) %>% 
+  ggplot(aes(x = reorder(value, count), y = count)) +
+  geom_col() +
+  coord_flip()
+
+# Other Uses of Regular Expressions
+
+apropos("replace")
+head(dir(pattern = "\\.Rmd$"))
+
+# Stringi
+
+?stringi
+library(stringi)
+
+## Exercises
+#1a
+stri_length(words)
+#1b
+stri_duplicated(words)
+#1c
+stri_rand_strings(100, 5)
+
+#2
+stri_sort(sentences)
+?stri_sort
